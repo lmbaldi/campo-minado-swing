@@ -10,6 +10,10 @@ public class Campo {
 	private boolean marcado;
 	
 	private List<Campo> vizinhos = new ArrayList<>();
+	private List<CampoObservador> observadores = new ArrayList<>();
+	//usar Set ao inves de List para evitar que o mesmo observer seja registrado duas vezes sem a necessidade de controlar
+	//privatte List<BiConsumer<Campo, CampoEvento> observadores = new ArrayList<>();// nao precisa criar a interfaces
+	
 	
 	private final int coluna;
 	private final int linha;
@@ -17,6 +21,16 @@ public class Campo {
 	public Campo(int coluna, int linha) {
 		this.coluna = coluna;
 		this.linha = linha;
+	}
+	
+	//metodo para registrar os observadores
+	public void registrarObservador(CampoObservador observador) {
+		observadores.add(observador);
+	}
+	
+	//metodo executado sempre que um evento ocorrer
+	private void notificarObservadores(CampoEvento evento) {
+		observadores.stream().forEach(o -> o.eventoOcorreu(this, evento));
 	}
 	
 	public boolean adicionarVizinho(Campo vizinho) {
@@ -42,15 +56,22 @@ public class Campo {
 	public void alternarMarcacao() {
 		if(!aberto) {
 			marcado = !marcado;
+			if(marcado) {
+				notificarObservadores(CampoEvento.MARCAR);
+			} else {
+				notificarObservadores(CampoEvento.DESMARCAR);
+			}
 		}
 	}
 	
 	public boolean abrir() {
 		if(!aberto && !marcado) {
-			aberto = true;
 			if(minado) {
-				// TODO  Implementar nova versao
+				notificarObservadores(CampoEvento.EXPLODIR);
+				return true;
 			}
+			
+			setAberto(true);
 			if(vizinhancaSegura()) {
 				vizinhos.forEach(v -> v.abrir());
 			}
@@ -78,6 +99,9 @@ public class Campo {
 	
 	void setAberto(boolean aberto) {
 		this.aberto = aberto;
+		if(aberto) {
+			notificarObservadores(CampoEvento.ABRIR);
+		}
 	}
 	
 	public boolean isAberto() {
