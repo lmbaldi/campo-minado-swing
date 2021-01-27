@@ -134,6 +134,8 @@ public class Campo {
 		aberto = false;
 		minado = false;
 		marcado = false;
+		//notifica a interface para que ela seja reincializada
+		notificarObservadores(CampoEvento.REINICIAR);
 	}
 	
 	

@@ -24,8 +24,8 @@ public class PainelTabuleiro extends JPanel {
 				} else {
 					JOptionPane.showMessageDialog(this, "Perdeu :(");
 				}
-				
 				tabuleiro.reiniciar();
+				
 			});
 		});
 	}
